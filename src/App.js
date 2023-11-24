@@ -1,9 +1,10 @@
 import logo from './logo.svg';
 import './App.css';
 import { Auth } from './componets/auth';
-import {db,auth} from ".///config/firebase"
+import {db,auth,storage} from ".///config/firebase"
 import { useEffect, useState } from 'react';
 import { getDocs, collection, addDoc,deleteDoc,doc,updateDoc } from "firebase/firestore";
+import { ref,uploadBytes } from 'firebase/storage';
 
 function App() {
   const [movieList,setMovieList]=useState([])
@@ -18,6 +19,9 @@ function App() {
     // id:auth?.currentUser?.uid
 
   })
+  //storage
+
+  const [fileUpload,setFileUpload]=useState(null)
 
   const moviesCollectionRef = collection(db,"movies")
   useEffect(()=>{
@@ -89,7 +93,17 @@ function App() {
       )
     );
   };
-  
+  const uploadFiles=async()=>{
+    if (!fileUpload ) return 
+
+    const filesFolferRed = ref(storage,`projectFiles/${fileUpload.name}`)
+    try {
+    await uploadBytes(filesFolferRed,fileUpload)      
+    } catch (error) {
+      console.error(`algo salio mal ${error}`);
+    }
+
+  }
   return (
     <div className="App">
       <Auth></Auth>
@@ -134,6 +148,11 @@ function App() {
         <button onClick={() => upDate(movie.id)}>Actualizar</button>
         </div>
       ))}
+    </div>
+    <div>
+        <input type='file' onChange={(e)=> setFileUpload(e.target.files[0])}/>
+        <button onClick={uploadFiles}>Subir Archivo</button>
+
     </div>
     </div>
   );
